@@ -1,0 +1,84 @@
+name: incident-commander
+description: "AI agent training environment for production incident management. Agent acts as an on-call SRE diagnosing, triaging, and resolving cloud infrastructure incidents with time pressure and partial credit rewards."
+version: "1.0.0"
+author: "divya sri"
+tags:
+  - sre
+  - incident-management
+  - devops
+  - real-world
+  - reinforcement-learning
+
+tasks:
+  - id: single_service_outage
+    name: "Single Service Outage"
+    difficulty: easy
+    description: "A single microservice is throwing 500 errors. Diagnose and fix the issue through logs, metrics, and appropriate remediation (restart, rollback, or config change)."
+    
+  - id: cascading_failure
+    name: "Cascading Failure"
+    difficulty: medium
+    description: "Multiple services failing due to a dependency chain reaction. Identify the root cause and fix in correct order to resolve the cascading failures."
+    
+  - id: multi_root_cause
+    name: "Multi-Root-Cause Incident"
+    difficulty: hard
+    description: "Multiple simultaneous issues with misleading logs and red herrings. Identify all root causes, prioritize by severity, and apply all necessary fixes."
+
+reward_system:
+  partial_credit: true
+  base_rewards:
+    investigative_action: 0.05
+    root_cause_identification: 0.15
+    correct_fix: 0.20
+    stakeholder_communication: 0.10
+    proper_escalation: 0.05
+  
+  penalties:
+    wrong_action: -0.05
+    premature_resolution: -0.10
+    unnecessary_action: -0.03
+    time_per_minute: -0.02
+  
+  bonuses:
+    time_efficiency: 0.10
+    first_correct_fix: 0.05
+    no_false_positives: 0.05
+
+observation_space:
+  - "timestamp: str"
+  - "active_alerts: List[Alert] with severity, service, title, description"
+  - "recent_logs: List[LogEntry] with timestamp, service, level, message, stack_trace"
+  - "metrics_snapshot: Dict of service to Dict of metric to float"
+  - "service_status: Dict of service to ServiceStatus (healthy/degraded/down)"
+  - "team_messages: List[Message] from stakeholders"
+  - "incident_timeline: List[TimelineEvent] of actions taken"
+  - "time_elapsed: float in minutes"
+  - "severity_level: P1/P2/P3/P4"
+  - "available_services: List[str]"
+  - "service_dependencies: Dict of service to List of dependent services"
+
+action_space:
+  - check_logs: View logs for a specific service
+  - check_metrics: View performance metrics for a service
+  - run_diagnostic: Run diagnostics on a service or system
+  - restart_service: Restart a service (potentially dangerous)
+  - rollback_deploy: Rollback to previous deployment version
+  - scale_service: Scale service replicas horizontally
+  - update_config: Change service configuration
+  - escalate: Escalate to senior engineer
+  - communicate: Post status update to stakeholders
+  - mark_resolved: Declare incident resolved
+  - check_dependencies: View service dependency graph
+  - check_recent_deploys: See recent deployment history
+
+endpoints:
+  - GET /health: Health check (200 if operational)
+  - POST /reset: Reset environment, start new episode
+  - POST /step: Execute one action, return observation+reward+done
+  - GET /state: Get current environment state (ground truth included)
+  - POST /episode-result: Get final episode score and results
+
+api_version: "1.0.0"
+openenv_compliant: true
+framework: "OpenEnv + Gymnasium"
